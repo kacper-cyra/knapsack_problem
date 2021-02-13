@@ -1,20 +1,18 @@
 import { item } from "./types/types";
-import { loadData } from "./loaders/loader";
-import { readValue } from "./helpers/getValue";
+import { loadData } from "./loaders/fileLoader";
+import { readValue } from "./getValue";
 
 const data = loadData("./data/data.txt");
 
-data.sort((a, b) => {
-  return b.valuePerWeightRatio - a.valuePerWeightRatio;
-});
-
-function solver(items: Array<item>, maxWeight: number, continuous: boolean = false): Array<number> {
+export function solver(items: Array<item>, maxWeight: number, continuous: boolean = false): Array<number> {
   const result: Array<number> = [];
   let leftWeight = maxWeight;
+  let maxResultValue;
 
   for (const item of items) {
     if (item.weight < maxWeight) {
-      if (item.weight < leftWeight) {
+      if (item.weight <= leftWeight) {
+        console.log(item.weight, leftWeight);
         result.push(1);
         leftWeight -= item.weight;
       } else if (continuous) {
@@ -27,8 +25,8 @@ function solver(items: Array<item>, maxWeight: number, continuous: boolean = fal
   return result;
 }
 
-console.log(data);
+//console.log(data);
 //change name
 const bestResult = solver(data, 15, true);
-console.log(bestResult);
+//console.log(bestResult);
 const value = readValue(data, bestResult);

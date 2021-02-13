@@ -1,4 +1,4 @@
-import { item } from "../types/types";
+import { item } from "./types/types";
 
 export function readValue(items: Array<item>, itemsTaken: Array<number>): number {
   return itemsTaken.reduce((sum, taken, index) => {

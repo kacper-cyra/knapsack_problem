@@ -2,7 +2,9 @@ import { readFileSync } from "fs";
 import { item } from "../types/types";
 
 export function loadData(fileName: string): Array<item> {
-  return mapData(readFile(fileName));
+  return mapData(readFile(fileName)).sort((a, b) => {
+    return b.valuePerWeightRatio - a.valuePerWeightRatio;
+  });
 }
 
 function mapData(fileLine: Array<string>) {

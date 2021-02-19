@@ -1,32 +1,21 @@
-import { item } from "./types/types";
+import { Item, change } from "./types/types";
 import { loadData } from "./loaders/fileLoader";
-import { readValue } from "./getValue";
+import { Backpack } from "./backpack";
+import { findBestSet } from "./bestSet/bestSet";
 
-const data = loadData("./data/data.txt");
+const data = loadData("./data/zad1.txt");
 
-export function solver(items: Array<item>, maxWeight: number, continuous: boolean = false): Array<number> {
-  const result: Array<number> = [];
-  let leftWeight = maxWeight;
-  let maxResultValue;
+export function solver(items: Array<Item>, maxWeight: number) {
+  const backpack = new Backpack(items, maxWeight);
+  backpack.set = backpack.bestImpossibleOutcome(maxWeight);
 
-  for (const item of items) {
-    if (item.weight < maxWeight) {
-      if (item.weight <= leftWeight) {
-        console.log(item.weight, leftWeight);
-        result.push(1);
-        leftWeight -= item.weight;
-      } else if (continuous) {
-        result.push(Math.round((leftWeight / item.weight) * 100) / 100);
-        return result;
-      }
-    }
-  }
-
-  return result;
+  Backpack.bestSet = [];
+  findBestSet(backpack, { value: 0, index: backpack.notFullItemIndex });
+  findBestSet(backpack, { value: 1, index: backpack.notFullItemIndex });
+  return [Backpack.bestSet, Backpack.maxTotalValue];
 }
 
 //console.log(data);
 //change name
-const bestResult = solver(data, 15, true);
-//console.log(bestResult);
-const value = readValue(data, bestResult);
+const bestResult = solver(data, 12);
+console.log(bestResult);

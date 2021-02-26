@@ -1,29 +1,20 @@
 import { Backpack } from "../backpack";
-import { change } from "../types/types";
+import { Change } from "../types/types";
 
-export function findBestSet(backpack: Backpack, { value, index }: change) {
-  backpack.set[index] = value;
-  const direction = value === 0 ? 1 : -1;
+export function findBestSet(backpack: Backpack, { isTaken, index }: Change, options?: {}): void {
+  if (isTaken === 1) backpack.set.fill(0);
+  backpack.set[index] = backpack.items[index].weight * isTaken > backpack.maxWeight ? backpack.maxWeight / backpack.items[index].weight : isTaken;
+  index = isTaken === 0 ? index + 1 : 0;
+  if (index < backpack.numberOfItems) backpack.set = backpack.bestImpossibleOutcome(index);
 
-  index += direction;
-
-  if (value === 1 && index > 0 && index < backpack.numberOfItems) {
-    backpack.removeOverWeight(index, direction);
-  }
-
-  backpack.tryToFitItems(index, direction);
+  Backpack.allSets.push({ set: backpack.set, value: backpack.totalValue, weight: backpack.totalWeight });
 
   if (backpack.notFullItemIndex === -1) {
     if (Backpack.maxTotalValue <= backpack.totalValue) {
-      Backpack.maxTotalValue = backpack.totalValue;
-      Backpack.bestSet = Backpack.maxTotalValue === backpack.totalValue ? [backpack.set, ...Backpack.bestSet] : [backpack.set];
+      Backpack.insertBestSet(backpack.set, backpack.totalValue);
     }
-  } else if (Backpack.maxTotalValue <= backpack.totalValue) {
-    findBestSet(new Backpack(backpack.items, backpack.maxWeight, [...backpack.set]), { value: 0, index: backpack.notFullItemIndex });
-    findBestSet(new Backpack(backpack.items, backpack.maxWeight, [...backpack.set]), { value: 1, index: backpack.notFullItemIndex });
+  } else if (Backpack.maxTotalValue < backpack.totalValue) {
+    findBestSet(new Backpack(backpack.items, backpack.maxWeight, [...backpack.set]), { isTaken: 0, index: backpack.notFullItemIndex });
+    findBestSet(new Backpack(backpack.items, backpack.maxWeight, [...backpack.set]), { isTaken: 1, index: backpack.notFullItemIndex });
   }
 }
-
-//export function findBestSetStrategy(options = { returnAllSets: false, visualize: false, performance: false }) {
-//
-//}

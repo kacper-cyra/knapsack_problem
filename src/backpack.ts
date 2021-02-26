@@ -1,4 +1,4 @@
-import { Item, Set } from "./types/types";
+import { Item, Set, GatheredData } from "./types/types";
 
 export class Backpack {
   public set: Set;
@@ -6,7 +6,8 @@ export class Backpack {
   public readonly items: Array<Item>;
   public readonly numberOfItems: number;
   static maxTotalValue = 0;
-  static bestSet: Array<Set>;
+  static bestSet: Array<Set> = [];
+  static allSets: Array<GatheredData> = [];
 
   constructor(items: Array<Item>, maxWeight: number, set: Set = []) {
     this.set = set.length ? set : new Array(items.length).fill(0);
@@ -16,58 +17,42 @@ export class Backpack {
   }
 
   get totalValue(): number {
-    return this.items.map(item => item.value).reduce((sum, value, index) => (sum += value * this.set[index]));
+    return Math.round(this.items.map(item => item.value).reduce((sum, value, index) => (sum += value * this.set[index]), 0) * 100) / 100;
   }
 
   get totalWeight(): number {
-    return this.items.map(item => item.weight).reduce((sum, value, index) => (sum += value * this.set[index]));
+    return Math.round(this.items.map(item => item.weight).reduce((sum, value, index) => (sum += value * this.set[index]), 0) * 100) / 100;
   }
 
   get notFullItemIndex(): number {
     return this.set.findIndex(val => val > 0 && val < 1);
   }
 
-  bestImpossibleOutcome(maxWeight: number): Set {
+  bestImpossibleOutcome(index: number): Set {
+    const { set, maxWeight } = this;
     const ROUND_ACCURACY = 1000;
-    const set = this.set;
-    let leftWeight = maxWeight;
-    let index = 0;
+    let leftWeight = maxWeight - this.totalWeight;
 
-    while (leftWeight) {
+    if (index >= this.numberOfItems) return set;
+
+    while (leftWeight > 0 && index < this.numberOfItems) {
       const weight = this.items[index].weight;
 
-      if (weight < maxWeight) {
-        if (weight <= leftWeight) {
-          set[index] = 1;
-          leftWeight -= weight;
-        } else {
-          set[index] = Math.round((leftWeight / weight) * ROUND_ACCURACY) / ROUND_ACCURACY;
-          leftWeight = 0;
-        }
+      if (weight <= leftWeight) {
+        set[index] = 1;
+        leftWeight -= weight;
+      } else {
+        set[index] = Math.round((leftWeight / weight) * ROUND_ACCURACY) / ROUND_ACCURACY;
+        leftWeight = 0;
       }
 
       index++;
     }
-
     return set;
   }
 
-  removeOverWeight(index: number, direction: number) {
-    let i = 0;
-    while (this.totalWeight > this.maxWeight) {
-      this.set[index + i * direction] = 0;
-      i++;
-    }
-  }
-
-  tryToFitItems(index: number, direction: number) {
-    let leftWeight = this.maxWeight - this.totalWeight;
-
-    while (leftWeight > 0 && index >= 0 && index < this.numberOfItems) {
-      const howMuchFitInside = leftWeight / this.items[index].weight;
-      leftWeight -= this.items[index].weight * howMuchFitInside;
-      this.set[index] = howMuchFitInside > 1 ? 1 : howMuchFitInside;
-      index += direction;
-    }
+  static insertBestSet(set: Set, totalValue: number) {
+    Backpack.maxTotalValue = totalValue;
+    Backpack.bestSet = Backpack.maxTotalValue === totalValue ? [set, ...Backpack.bestSet] : [set];
   }
 }

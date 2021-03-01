@@ -1,17 +1,10 @@
-import { solver } from "../src/index";
-import { loadData } from "../src/loaders/fileLoader";
-describe("Solver testing.", () => {
-  const input = loadData("./data/data.txt");
+import { solver } from '../src/index';
+import { items1 } from './items';
 
-  it("Best set of items if three first items fit.", () => {
-    const maxWeight = 15;
+describe('Solver', () => {
+  it('Solves when best result is in left part of heap', () => {
+    const maxWeight = 12;
 
-    expect(solver(input, maxWeight)).toEqual([1, 1, 1]);
-  });
-
-  it("Best set of item.", () => {
-    const maxWeight = 18;
-
-    expect(solver(input, maxWeight)).toEqual([1, 1, 1, 0, 0, 1]);
+    expect(solver(items1, maxWeight)).toMatchObject([[[1, 1, 1, 0, 0]], 15]);
   });
 });

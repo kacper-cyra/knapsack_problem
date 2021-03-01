@@ -1,4 +1,4 @@
-import { Item, GatheredData, Set } from "../types/types";
+import { Item, GatheredData, Set } from '../types/types';
 
 export function sortById(items: Array<Item>, sets: Array<GatheredData>) {
   const itemsCopy = [...items];
@@ -9,7 +9,7 @@ export function sortById(items: Array<Item>, sets: Array<GatheredData>) {
     const newSet: Set = [];
     const { value, weight } = gatheredData;
     sortedItems.map((item, index) => {
-      const sameItemIndex = itemsCopy.findIndex(searchedItem => searchedItem.id === item.id);
+      const sameItemIndex = itemsCopy.findIndex((searchedItem) => searchedItem.id === item.id);
       newSet[index] = gatheredData.set[sameItemIndex];
     });
     result.push({ set: newSet, value: value, weight: weight });

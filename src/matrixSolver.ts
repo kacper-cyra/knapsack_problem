@@ -1,4 +1,4 @@
-import { Item } from "./types/types";
+import { Item } from './types/types';
 
 function matrixSolver(items: Array<Item>, maxWeight: number) {
   const length = items.length;

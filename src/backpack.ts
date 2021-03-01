@@ -1,4 +1,4 @@
-import { Item, Set, GatheredData } from "./types/types";
+import { Item, Set, GatheredData } from './types/types';
 
 export class Backpack {
   public set: Set;
@@ -17,15 +17,15 @@ export class Backpack {
   }
 
   get totalValue(): number {
-    return Math.round(this.items.map(item => item.value).reduce((sum, value, index) => (sum += value * this.set[index]), 0) * 100) / 100;
+    return Math.round(this.items.map((item) => item.value).reduce((sum, value, index) => (sum += value * this.set[index]), 0) * 100) / 100;
   }
 
   get totalWeight(): number {
-    return Math.round(this.items.map(item => item.weight).reduce((sum, value, index) => (sum += value * this.set[index]), 0) * 100) / 100;
+    return Math.round(this.items.map((item) => item.weight).reduce((sum, value, index) => (sum += value * this.set[index]), 0) * 100) / 100;
   }
 
   get notFullItemIndex(): number {
-    return this.set.findIndex(val => val > 0 && val < 1);
+    return this.set.findIndex((val) => val > 0 && val < 1);
   }
 
   bestImpossibleOutcome(index: number): Set {

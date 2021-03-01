@@ -1,5 +1,5 @@
-import { readFileSync } from "fs";
-import { Item } from "../types/types";
+import { readFileSync } from 'fs';
+import { Item } from '../types/types';
 
 // Each line in the file needs to be made of two numbers separated with a comma
 // First number is value second one is weight
@@ -12,7 +12,7 @@ export function loadData(fileName: string): Array<Item> {
 
 function mapData(fileLine: Array<string>) {
   return fileLine.map((item, index) => {
-    const weightValuePair = item.replace("\r", "").split(",");
+    const weightValuePair = item.replace('\r', '').split(',');
     return {
       id: index,
       value: parseInt(weightValuePair[0]),
@@ -23,5 +23,5 @@ function mapData(fileLine: Array<string>) {
 }
 
 function readFile(fileName: string): Array<string> {
-  return readFileSync(fileName).toString().split("\n");
+  return readFileSync(fileName).toString().split('\n');
 }

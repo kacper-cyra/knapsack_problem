@@ -3,6 +3,7 @@ import { loadData } from './loaders/fileLoader';
 import { Backpack } from './backpack';
 import { findBestSet } from './bestSet/bestSet';
 import { sortById } from './helpers/sortGatheredDatasById';
+import { generateData } from './helpers/generateData';
 
 const data = loadData('./data/zad3.txt');
 
@@ -36,5 +37,9 @@ export function solver(items: Array<Item>, maxWeight: number) {
   return [Backpack.bestSet, Backpack.maxTotalValue];
 }
 
-const bestResult = solver(data, 20);
+const generatedData = generateData(5, {
+  wageOptions: { average: 5, standardDeviation: 5 },
+  valueOptions: { average: 10, standardDeviation: 5 },
+});
+const bestResult = solver(generatedData, 15);
 console.log(bestResult);

@@ -1,22 +1,16 @@
-import { Item } from '../types/types';
+import { Item, GeneratorOptions } from '../types/types';
 
-interface generatorOptions {
-  wageOptions: { average: number; standardDeviation: number };
-  valueOptions: { average: number; standardDeviation: number };
-  roundDigits?: number;
-}
-
-export function generateData(numberOfItems: number, options: generatorOptions): Array<Item> {
-  const { wageOptions, valueOptions, roundDigits } = options;
+export function generateData(numberOfItems: number, options: GeneratorOptions): Array<Item> {
+  const { weight, value, roundDigits } = options;
   const roundValue = roundDigits ? Math.pow(10, roundDigits) : 1;
   const result = [];
   let index = 0;
 
   while (index < numberOfItems) {
-    const weight = Math.round((wageOptions.average + (Math.random() * 2 - 1) * wageOptions.standardDeviation) * roundValue) / roundValue;
-    const value = Math.round((valueOptions.average + (Math.random() * 2 - 1) * valueOptions.standardDeviation) * roundValue) / roundValue;
+    const generatedWeight = Math.round((weight.average + (Math.random() * 2 - 1) * weight.standardDeviation) * roundValue) / roundValue;
+    const generatedValue = Math.round((value.average + (Math.random() * 2 - 1) * value.standardDeviation) * roundValue) / roundValue;
 
-    result.push({ id: index, weight, value, valuePerWeightRatio: value / weight });
+    result.push({ id: index, weight: generatedWeight, value: generatedValue, valuePerWeightRatio: generatedValue / generatedWeight });
     index++;
   }
 

@@ -19,3 +19,7 @@ Or
 ```
     npm run start
 ```
+
+### Additional information
+
+Visual representation of tree is being saved in temp folder in root directory.

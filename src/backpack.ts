@@ -1,3 +1,4 @@
+import { ROUND_ACCURACY } from './globals';
 import { Item, Set, GatheredData } from './types/types';
 
 export class Backpack {
@@ -30,7 +31,6 @@ export class Backpack {
 
   bestImpossibleOutcome(index: number): Set {
     const { set, maxWeight } = this;
-    const ROUND_ACCURACY = 1000;
     let leftWeight = maxWeight - this.totalWeight;
 
     if (index >= this.numberOfItems) return set;

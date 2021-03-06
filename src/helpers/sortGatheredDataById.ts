@@ -7,12 +7,12 @@ export function sortById(items: Array<Item>, sets: Array<GatheredData>) {
 
   for (const gatheredData of sets) {
     const newSet: Set = [];
-    const { value, weight } = gatheredData;
+    const { value, weight, calledFrom, level } = gatheredData;
     sortedItems.map((item, index) => {
       const sameItemIndex = itemsCopy.findIndex((searchedItem) => searchedItem.id === item.id);
       newSet[index] = gatheredData.set[sameItemIndex];
     });
-    result.push({ set: newSet, value: value, weight: weight });
+    result.push({ set: newSet, value: value, weight: weight, calledFrom, level });
   }
   return result;
 }

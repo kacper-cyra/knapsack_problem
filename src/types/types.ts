@@ -27,3 +27,8 @@ export interface GeneratorOptions {
   value: { average: number; standardDeviation: number };
   roundDigits?: number;
 }
+
+export interface VisualRepresentationOptions {
+  valueSeparator?: string;
+  setSeparator?: string;
+}

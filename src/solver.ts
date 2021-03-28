@@ -1,41 +1,91 @@
 import { Backpack } from './backpack';
-import { ROUND_ACCURACY } from './globals';
-import { Change } from './types/types';
+import { GatheredData, Item, resultObject, Set } from './types/types';
+import fs from 'fs';
+import { sortSetById } from './helpers/sortById';
+import { testingSolver } from './solvers/testingSolver';
+import { solver } from './solvers/solver';
 
-export function solver(backpack: Backpack, { isTaken, index, calledFrom, level }: Change, options?: {}): void {
-  if (isTaken === 1) backpack.set.fill(0);
-  backpack.set[index] =
-    backpack.items[index].weight * isTaken > backpack.maxWeight
-      ? Math.round((backpack.maxWeight / backpack.items[index].weight) * ROUND_ACCURACY) / ROUND_ACCURACY
-      : isTaken;
-  index = isTaken === 0 ? index + 1 : 0;
-  if (index < backpack.numberOfItems) backpack.set = backpack.bestImpossibleOutcome(index);
+export function solverFactory(options = { gatherData: false }) {
+  const fun = options.gatherData ? testingSolver : solver;
 
-  Backpack.allSets.push({
-    set: backpack.set,
-    value: backpack.totalValue,
-    weight: backpack.totalWeight,
-    calledFrom,
-    level,
+  return function solve(items: Array<Item>, maxWeight: number): resultObject {
+    try {
+      const backpack = new Backpack(items, maxWeight);
+      const startTime: number = Date.now();
+      const solver = fun;
+      backpack.set = backpack.bestImpossibleOutcome();
+
+      Backpack.allSets.push({
+        set: backpack.set,
+        value: backpack.totalValue.toNumber(),
+        weight: backpack.totalWeight.toNumber(),
+        calledFrom: -1,
+        level: -1,
+        hasOnlyCompleteItems: backpack.notFullItemIndex === -1,
+        sequenceValue: backpack.set.reduce((prev, val) => (prev += val)),
+      });
+
+      if (backpack.notFullItemIndex === -1) {
+        Backpack.bestSet = [backpack.set];
+        return { set: sortSetById(backpack.items, Backpack.bestSet[0]), items: backpack.items, value: Backpack.maxTotalValue, numberOfExecutions: 1 };
+      } else if (backpack.notFullItemIndex === backpack.numberOfItems - 1) {
+        backpack.set[backpack.numberOfItems - 1] = 0;
+        Backpack.bestSet = [backpack.set];
+        return { set: sortSetById(backpack.items, Backpack.bestSet[0]), items: backpack.items, value: Backpack.maxTotalValue, numberOfExecutions: 1 };
+      }
+      if (!backpack.isValueHigherThenMaxValue) return nullReturnObject;
+
+      solver(new Backpack(items, maxWeight, [...backpack.set]), {
+        isTaken: 0,
+        index: backpack.notFullItemIndex,
+        calledFrom: 0,
+        level: 1,
+        setIndex: [],
+      });
+      solver(new Backpack(items, maxWeight, [...backpack.set]), {
+        isTaken: 1,
+        index: backpack.notFullItemIndex,
+        calledFrom: 0,
+        level: 1,
+        setIndex: [],
+      });
+      //console.log('Running time: ', Date.now() - startTime);
+
+      writeAllSetsToFile(Backpack.allSets, items);
+
+      return {
+        weight: Backpack.maxTotalWeight,
+        value: Backpack.maxTotalValue,
+        set: sortSetById(backpack.items, Backpack.bestSet[0]),
+        items: backpack.items,
+        numberOfExecutions: Backpack.allSets.length,
+      };
+    } catch (err) {
+      console.log(err);
+      const errorLogging = fs.createWriteStream(`${__dirname}\\..\\log\\${Date.now()}.txt`, { flags: 'a' });
+      errorLogging.write('Caught exception: ' + err);
+      fs.writeFileSync(`${__dirname}\\..\\log\\data${Date.now()}.json`, JSON.stringify({ items, maxWeight }));
+      return nullReturnObject;
+    }
+  };
+}
+
+const nullReturnObject = { items: [], set: [], value: 0, numberOfExecutions: 0 };
+
+function writeAllSetsToFile(data: Array<GatheredData>, items: Array<Item>) {
+  const sets: Set[] = [];
+  const res = data.map((val) => {
+    const sortedSet = sortSetById(items, [...val.set]);
+    sets.push(val.set);
+    return {
+      value: val.value,
+      weight: val.weight,
+      sequenceValue: val.sequenceValue,
+      hasOnlyCompleteItems: val.hasOnlyCompleteItems,
+      set: val.hasOnlyCompleteItems ? sortedSet : [],
+    };
   });
 
-  if (backpack.notFullItemIndex === -1) {
-    if (Backpack.maxTotalValue <= backpack.totalValue) {
-      Backpack.insertBestSet(backpack.set, backpack.totalValue);
-    }
-  } else if (Backpack.maxTotalValue < backpack.totalValue) {
-    const setIndex = Backpack.allSets.length - 1;
-    solver(new Backpack(backpack.items, backpack.maxWeight, [...backpack.set]), {
-      isTaken: 0,
-      index: backpack.notFullItemIndex,
-      calledFrom: setIndex,
-      level: level + 1,
-    });
-    solver(new Backpack(backpack.items, backpack.maxWeight, [...backpack.set]), {
-      isTaken: 1,
-      index: backpack.notFullItemIndex,
-      calledFrom: setIndex,
-      level: level + 1,
-    });
-  }
+  fs.writeFileSync(__dirname + '\\..\\temp\\results.json', JSON.stringify(res), { flag: 'w' });
+  fs.writeFileSync(__dirname + '\\..\\temp\\sets.json', JSON.stringify(sets), { flag: 'w' });
 }

@@ -1,18 +1,13 @@
 import { Backpack } from './backpack';
-import { GatheredData, Item, resultObject, Set } from './types/types';
+import { Change, GatheredData, Item, resultObject, Set } from './types/types';
 import fs from 'fs';
 import { sortSetById } from './helpers/sortById';
-import { testingSolver } from './solvers/testingSolver';
-import { solver } from './solvers/solver';
 
-export function solverFactory(options = { gatherData: false }) {
-  const fun = options.gatherData ? testingSolver : solver;
-
-  return function solve(items: Array<Item>, maxWeight: number): resultObject {
+export function solve(solver: (backpack: Backpack, { isTaken, index, calledFrom, level, setIndex }: Change) => void) {
+  return function (items: Array<Item>, maxWeight: number): resultObject {
     try {
       const backpack = new Backpack(items, maxWeight);
       const startTime: number = Date.now();
-      const solver = fun;
       backpack.set = backpack.bestImpossibleOutcome();
 
       Backpack.allSets.push({
@@ -49,7 +44,7 @@ export function solverFactory(options = { gatherData: false }) {
         level: 1,
         setIndex: [],
       });
-      //console.log('Running time: ', Date.now() - startTime);
+      console.log('Running time: ', Date.now() - startTime);
 
       writeAllSetsToFile(Backpack.allSets, items);
 
@@ -72,7 +67,7 @@ export function solverFactory(options = { gatherData: false }) {
 
 const nullReturnObject = { items: [], set: [], value: 0, numberOfExecutions: 0 };
 
-function writeAllSetsToFile(data: Array<GatheredData>, items: Array<Item>) {
+async function writeAllSetsToFile(data: Array<GatheredData>, items: Array<Item>) {
   const sets: Set[] = [];
   const res = data.map((val) => {
     const sortedSet = sortSetById(items, [...val.set]);

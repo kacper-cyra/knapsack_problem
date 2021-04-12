@@ -1,41 +1,41 @@
-import Decimal from 'decimal.js';
 import { Backpack } from '../backpack';
-import { ROUND_ACCURACY } from '../globals';
 import { Change } from '../types/types';
 
-export function testingSolver(backpack: Backpack, { isTaken, index, calledFrom, level, setIndex }: Change, options?: {}): void {
-  if (isTaken === 1) backpack.set.fill(0);
-  backpack.set[index] = backpack.items[index].weight.mul(isTaken).greaterThan(backpack.maxWeight)
-    ? new Decimal(backpack.maxWeight).dividedBy(backpack.items[index].weight).toNumber()
-    : isTaken;
-  index = isTaken === 0 ? index + 1 : index;
-  if (index < backpack.numberOfItems) backpack.set = backpack.bestImpossibleOutcome(isTaken === 0 ? index + 1 : 0);
+export function solver(backpack: Backpack, { isTaken, index, calledFrom, level, setIndex }: Change, options?: {}): void {
+  let indexOfItemThatDoesNotFit: number;
 
-  // Backpack.allSets.push({
-  //   set: backpack.set,
-  //   value: backpack.totalValue,
-  //   weight: backpack.totalWeight,
-  //   calledFrom,
-  //   level,
-  // });
+  if (index < 0 || index >= backpack.numberOfItems) return;
+  backpack.changeValueInSet(index, isTaken, setIndex);
+  if (index <= backpack.numberOfItems) backpack.set = backpack.bestImpossibleOutcome(index, isTaken, setIndex);
+  isTaken ? index-- : index++;
+  indexOfItemThatDoesNotFit = backpack.notFullItemIndex;
 
-  if (backpack.notFullItemIndex === -1) {
-    if (new Decimal(Backpack.maxTotalValue).lessThanOrEqualTo(backpack.totalValue)) {
-      Backpack.insertBestSet(backpack.set, backpack.totalValue.toNumber(), backpack.totalWeight.toNumber());
-    }
-  } else if (Backpack.maxTotalValue < backpack.totalValue.toNumber()) {
-    const calledFrom = Backpack.allSets.length - 1;
-    testingSolver(new Backpack(backpack.items, backpack.maxWeight, [...backpack.set]), {
+  Backpack.allSets.push({
+    set: backpack.set,
+    value: backpack.totalValue.toNumber(),
+    weight: backpack.totalWeight.toNumber(),
+    calledFrom,
+    level,
+    hasOnlyCompleteItems: indexOfItemThatDoesNotFit === -1,
+    sequenceValue: backpack.set.reduce((prev, val) => prev + val),
+  });
+  if (!backpack.isValueHigherThenMaxValue()) return;
+
+  if (indexOfItemThatDoesNotFit === -1 && backpack.totalWeight.lessThanOrEqualTo(backpack.maxWeight)) {
+    Backpack.insertBestSet([...backpack.set], backpack.totalValue.toNumber(), backpack.totalWeight.toNumber());
+  } else {
+    const solvedSetIndex = Backpack.allSets.length - 1;
+    solver(new Backpack(backpack.items, backpack.maxWeight, [...backpack.set]), {
       isTaken: 0,
-      index: backpack.notFullItemIndex,
-      calledFrom: calledFrom,
+      index: indexOfItemThatDoesNotFit,
+      calledFrom: solvedSetIndex,
       level: level + 1,
       setIndex: [...setIndex],
     });
-    testingSolver(new Backpack(backpack.items, backpack.maxWeight, [...backpack.set]), {
+    solver(new Backpack(backpack.items, backpack.maxWeight, [...backpack.set]), {
       isTaken: 1,
-      index: backpack.notFullItemIndex,
-      calledFrom: calledFrom,
+      index: indexOfItemThatDoesNotFit,
+      calledFrom: solvedSetIndex,
       level: level + 1,
       setIndex: [...setIndex],
     });

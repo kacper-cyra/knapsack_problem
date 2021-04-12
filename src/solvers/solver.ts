@@ -1,5 +1,4 @@
 import { Backpack } from '../backpack';
-import { ROUND_ACCURACY } from '../globals';
 import { Change } from '../types/types';
 
 export function solver(backpack: Backpack, { isTaken, index, calledFrom, level, setIndex }: Change, options?: {}): void {
@@ -11,15 +10,6 @@ export function solver(backpack: Backpack, { isTaken, index, calledFrom, level, 
   isTaken ? index-- : index++;
   indexOfItemThatDoesNotFit = backpack.notFullItemIndex;
 
-  Backpack.allSets.push({
-    set: backpack.set,
-    value: backpack.totalValue.toNumber(),
-    weight: backpack.totalWeight.toNumber(),
-    calledFrom,
-    level,
-    hasOnlyCompleteItems: indexOfItemThatDoesNotFit === -1,
-    sequenceValue: backpack.set.reduce((prev, val) => prev + val),
-  });
   if (!backpack.isValueHigherThenMaxValue()) return;
 
   if (indexOfItemThatDoesNotFit === -1 && backpack.totalWeight.lessThanOrEqualTo(backpack.maxWeight)) {

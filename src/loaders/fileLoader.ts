@@ -1,3 +1,4 @@
+import Decimal from 'decimal.js';
 import { readFileSync } from 'fs';
 import { Item } from '../types/types';
 
@@ -6,18 +7,18 @@ import { Item } from '../types/types';
 
 export function loadData(fileName: string): Array<Item> {
   return mapData(readFile(fileName)).sort((a, b) => {
-    return b.valuePerWeightRatio - a.valuePerWeightRatio;
+    return b.valuePerWeightRatio.minus(a.valuePerWeightRatio).toNumber();
   });
 }
 
-function mapData(fileLine: Array<string>) {
+function mapData(fileLine: Array<string>): Item[] {
   return fileLine.map((item, index) => {
     const weightValuePair = item.replace('\r', '').split(',');
     return {
       id: index,
-      value: parseInt(weightValuePair[0]),
-      weight: parseInt(weightValuePair[1]),
-      valuePerWeightRatio: parseInt(weightValuePair[0]) / parseInt(weightValuePair[1]),
+      value: new Decimal(weightValuePair[0]),
+      weight: new Decimal(weightValuePair[1]),
+      valuePerWeightRatio: new Decimal(weightValuePair[0]).dividedBy(weightValuePair[1]),
     };
   });
 }

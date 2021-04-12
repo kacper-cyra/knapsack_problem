@@ -1,3 +1,4 @@
+import Decimal from 'decimal.js';
 import { Item, GeneratorOptions } from '../types/types';
 
 export function generateData(numberOfItems: number, options: GeneratorOptions): Array<Item> {
@@ -7,10 +8,10 @@ export function generateData(numberOfItems: number, options: GeneratorOptions): 
   let index = 0;
 
   while (index < numberOfItems) {
-    const generatedWeight = Math.round((weight.average + (Math.random() * 2 - 1) * weight.standardDeviation) * roundValue) / roundValue;
-    const generatedValue = Math.round((value.average + (Math.random() * 2 - 1) * value.standardDeviation) * roundValue) / roundValue;
+    const generatedWeight = new Decimal(Math.round((weight.average + (Math.random() * 2 - 1) * weight.standardDeviation) * roundValue) / roundValue);
+    const generatedValue = new Decimal(Math.round((value.average + (Math.random() * 2 - 1) * value.standardDeviation) * roundValue) / roundValue);
 
-    result.push({ id: index, weight: generatedWeight, value: generatedValue, valuePerWeightRatio: generatedValue / generatedWeight });
+    result.push({ id: index, weight: generatedWeight, value: generatedValue, valuePerWeightRatio: generatedValue.dividedBy(generatedWeight) });
     index++;
   }
 

@@ -1,3 +1,7 @@
+## Description
+
+Project was made as intruduction to the knapsack problem in reaserch group consisting of 4 people. It contains a greedy algorithm solving knapsack problem. Problem with floating points was solved by Decimal library. 
+
 ## Running the project
 
 1. Install dependencies
@@ -12,7 +16,7 @@
     npm run node
 ```
 
-Or
+or
 
 2. Run code and watch for changes
 
